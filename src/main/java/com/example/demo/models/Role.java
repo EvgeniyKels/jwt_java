@@ -8,11 +8,13 @@ import javax.persistence.FetchType;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
+import org.springframework.security.core.GrantedAuthority;
+
 import lombok.Data;
 
 @Entity
 @Table(name = "roles")
-public class Role extends BaseEntity {
+public class Role extends BaseEntity implements GrantedAuthority{
 	@Column(name = "name")
 	private String name;
 	
@@ -33,6 +35,12 @@ public class Role extends BaseEntity {
 
 	public void setUsers(List<User> users) {
 		this.users = users;
+	}
+
+	@Override
+	public String getAuthority() {
+		// TODO Auto-generated method stub
+		return this.getName();
 	}
 	
 	

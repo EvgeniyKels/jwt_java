@@ -11,6 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.dto.AuthenticationRequestDTO;
 import com.example.demo.dto.RefreshRequestDTO;
 import com.example.demo.models.User;
+import com.example.demo.security.JWTUserDetailsService;
 import com.example.demo.security.jwt.JwtTokenProvider;
 import com.example.demo.service.IUserService;
 
@@ -35,6 +37,8 @@ public class AuthentificationRestControllerV1 {
 	private JwtTokenProvider jwtTokenProvider;
 	@Autowired
 	private IUserService userService;
+	@Autowired
+	private JWTUserDetailsService userservice;
 
 	@SuppressWarnings("rawtypes")
 	@PostMapping("login")
@@ -66,11 +70,11 @@ public class AuthentificationRestControllerV1 {
 		return ResponseEntity.ok(responseBody);
 	}
 	private Map<Object, Object> extracted(String userName) {
-		User user = userService.findByUsername(userName);
+		UserDetails user = userservice.loadUserByUsername(userName);
 		if (user == null) {
 			throw new UsernameNotFoundException("User with username: " + userName + " notexist in system");
 		}
-		String token = jwtTokenProvider.createToken(userName, user.getRoles());
+		String token = jwtTokenProvider.createToken(userName, user.getAuthorities());
 		String refreshToken = jwtTokenProvider.createRefreshToken(userName);
 		Map<Object, Object> responseBody = new HashMap<>();
 		responseBody.put("username", userName);
